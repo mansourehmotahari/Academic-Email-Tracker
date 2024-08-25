@@ -1,5 +1,5 @@
 function loadUniversityData() {
-  var fileId = "your-file-ID"; // استفاده از ID فایل
+  var fileId = "Your-file-id"; 
   var file = DriveApp.getFileById(fileId);
   var content = file.getBlob().getDataAsString();
   return JSON.parse(content);
@@ -11,14 +11,10 @@ function getUniversityFromDomain(domain, universityData) {
       return universityData[i].name;
     }
   }
-  return "No result";
+  return null; 
 }
 
 function logEmails() {
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Sheet1");
-  if (!sheet) {
-    sheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("Sheet1");
-  }
   var threads = GmailApp.search('in:sent after:2023/01/01');
   var universityData = loadUniversityData();
   
@@ -42,8 +38,29 @@ function logEmails() {
 
         var university = getUniversityFromDomain(emailDomain, universityData);
 
-        sheet.appendRow([recipient, dateSent, subject, body, responseReceived, responseSummary, university]);
+        if (university !== null) {
+          var sheet = getOrCreateSheet(university);
+          sheet.appendRow([recipient, dateSent, subject, body, responseReceived, responseSummary]);
+        } else {
+          var unknownDomainsSheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("UnknownDomains");
+          if (!unknownDomainsSheet) {
+            unknownDomainsSheet = SpreadsheetApp.getActiveSpreadsheet().insertSheet("UnknownDomains");
+          }
+          unknownDomainsSheet.appendRow([recipient, dateSent, subject, body, emailDomain, "Unknown"]);
+        }
       }
     });
   });
+}
+
+function getOrCreateSheet(sheetName) {
+  var spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = spreadsheet.getSheetByName(sheetName);
+  
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+    sheet.appendRow(["Recipient", "Date Sent", "Subject", "Body", "Response Received", "Response Summary"]);
+  }
+  
+  return sheet;
 }
