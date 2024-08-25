@@ -1,12 +1,14 @@
 # Academic Email Tracker
 
 ## Description
-This Google Apps Script automates the tracking of emails sent to university professors during the academic application process. It logs details such as the recipient, date sent, subject, and response status into a Google Sheet, providing a detailed record of communications.
+This Google Apps Script automates the tracking of emails sent to university professors during the academic application process. It logs details such as the recipient, date sent, subject, and response status into a Google Sheet, with each university's emails organized into separate sheets. Additionally, the script automatically updates the logs every four hours, though this interval is adjustable.
 
 ## Features
-- **Automated Email Logging:** Logs every email sent, including details like the recipient's email, subject, and the date the email was sent.
+- **Automated Email Logging:** Logs every email sent to professors, including details like the recipient's email, subject, and the date the email was sent.
+- **Separate Sheets for Each University:** Emails are organized into individual sheets for each university, ensuring a clear and organized record for each institution.
 - **Response Tracking:** Captures responses from professors to provide insights into follow-ups.
 - **Google Sheets Integration:** Utilizes Google Sheets to organize and visualize the data effectively.
+- **Automatic Updates:** The script is set to run every four hours, automatically updating the logs. This interval can be customized to meet your specific needs.
 
 ## Data Source
 The script utilizes a comprehensive JSON file that includes university names and their associated email domains. This file is sourced from the following GitHub repository:
@@ -25,18 +27,30 @@ The script utilizes a comprehensive JSON file that includes university names and
 4. Save and name your project.
 
 ### Google Sheets
-- Create a new Google Sheet to log the email data.
-- Note the name of the sheet (default is 'Sheet1') or change it as per your preference in the script.
+- Create a new Google Sheet to log the email data. The script will automatically create separate sheets for each university as needed.
 
 ### Permissions
 - Run the script initially from the script editor to authorize it to access your Gmail and Google Sheets.
 
 ## Usage
-- Manually: Run the script from the Google Apps Script interface whenever needed.
-- Automatically: Set up a time-driven trigger in Google Apps Script to execute the script at regular intervals (daily, weekly, etc.).
+- **Manual Execution:** You can run the script manually from the Google Apps Script interface whenever needed.
+- **Automatic Updates:** The script is configured to run automatically every four hours. You can adjust the frequency by modifying the trigger settings in the `setupTrigger` function.
 
-## Contributing
-Feel free to fork this repository and contribute to the project by submitting pull requests with improvements or new features.
+## Customizing the Update Frequency
+To change the frequency of the automatic updates, modify the `setupTrigger` function in the script:
+```javascript
+function setupTrigger() {
+  // Clear existing triggers on the logEmails function
+  var existingTriggers = ScriptApp.getProjectTriggers();
+  for (var i = 0; i < existingTriggers.length; i++) {
+    if (existingTriggers[i].getHandlerFunction() == 'logEmails') {
+      ScriptApp.deleteTrigger(existingTriggers[i]);
+    }
+  }
 
-## Contact
-For support or to report issues, please file an issue through the GitHub issue tracker associated with this repository.
+  // Set a new time-driven trigger to run logEmails at the desired interval
+  ScriptApp.newTrigger('logEmails')
+    .timeBased()
+    .everyHours(4)  // Change this value to your desired interval
+    .create();
+}
