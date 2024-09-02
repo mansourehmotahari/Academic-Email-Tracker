@@ -1,7 +1,7 @@
 # Academic Email Tracker
 
 ## Description
-This Google Apps Script automates the tracking of emails sent to university professors during the academic application process. It logs details such as the recipient, date sent, subject, and response status into a Google Sheet, with each university's emails organized into separate sheets. Additionally, the script automatically updates the logs every four hours, though this interval is adjustable.
+This Google Apps Script automates the tracking of emails sent to university professors during the academic application process. It logs details such as the recipient, date sent, subject, and response status into a Google Sheet, with each university's emails organized into separate sheets. Additionally, the script automatically updates the logs every four hours, though this interval is adjustable. This version contains reminder part.
 
 ## Features
 - **Automated Email Logging:** Logs every email sent to professors, including details like the recipient's email, subject, and the date the email was sent.
@@ -18,16 +18,19 @@ The script utilizes a comprehensive JSON file that includes university names and
 1. Download the JSON file from the repository.
 2. Upload the downloaded file to your Google Drive.
 3. Right-click on the file in Google Drive, select `Get shareable link`, and note the file ID from the URL.
+   
+   (https://drive.google.com/file/d/1IX-8EFWvl1rfTYkA-tCyh0C9GVe/view?usp=drive_link) The file ID in the example URL is: 1IX-8EFWvl1rfTYkA-tCyh0C9GVe
+   
+5. Right-click on the Google Drive and create a Google Sheet.
+6. On the Google Sheet, from the Extention in Navigation Bar select Apps Script. 
 
 ## Setup Instructions
 ### Google Apps Script
-1. Go to [Google Apps Script](https://script.google.com) and create a new project.
+1. In the created Apps Script do the following steps.
 2. Copy the provided script into the script editor.
 3. Replace `'YOUR_FILE_ID_HERE'` in the script with the file ID of your JSON file stored in Google Drive.
 4. Save and name your project.
-
-### Google Sheets
-- Create a new Google Sheet to log the email data. The script will automatically create separate sheets for each university as needed.
+5. Run LogEmails in your script.
 
 ### Permissions
 - Run the script initially from the script editor to authorize it to access your Gmail and Google Sheets.
