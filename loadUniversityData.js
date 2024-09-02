@@ -48,6 +48,7 @@ function logEmails() {
             var reminderDate1 = new Date(message.getDate());
             reminderDate1.setDate(reminderDate1.getDate() + 3);
             rowData.push(reminderDate1.toLocaleDateString());
+            setupReminderTrigger(reminderDate1, recipient, subject, dateSent, "Reminder1");
 
             if (lastRow > 1) {
               var prevReminder1 = sheet.getRange(lastRow, 7).getValue();
@@ -55,6 +56,7 @@ function logEmails() {
                 var reminderDate2 = new Date(prevReminder1);
                 reminderDate2.setDate(reminderDate2.getDate() + 3);
                 rowData.push(reminderDate2.toLocaleDateString());
+                setupReminderTrigger(reminderDate2, recipient, subject, dateSent, "Reminder2");
               }
             }
 
@@ -64,11 +66,9 @@ function logEmails() {
                 var reminderDate3 = new Date(prevReminder2);
                 reminderDate3.setDate(reminderDate3.getDate() + 3);
                 rowData.push(reminderDate3.toLocaleDateString());
+                setupReminderTrigger(reminderDate3, recipient, subject, dateSent, "Reminder3");
               }
             }
-
-            // Send reminder email to your email address
-            sendReminderEmail(Session.getActiveUser().getEmail(), recipient, subject);
           }
 
           sheet.appendRow(rowData);
@@ -96,10 +96,34 @@ function getOrCreateSheet(sheetName) {
   return sheet;
 }
 
-function sendReminderEmail(yourEmail, recipient, subject) {
-  var reminderSubject = "Reminder: Follow up on email sent to " + recipient;
-  var reminderBody = "This is a reminder to follow up on the email you sent to " + recipient + " regarding the subject: " + subject + ". Please ensure to get in touch.";
-  MailApp.sendEmail(yourEmail, reminderSubject, reminderBody);
+function setupReminderTrigger(reminderDate, recipient, subject, dateSent, reminderType) {
+  var triggerDate = new Date(reminderDate);
+  ScriptApp.newTrigger('sendReminderEmail')
+    .timeBased()
+    .at(triggerDate)
+    .create();
+
+  // Store the details in the script properties to access them later when the trigger fires
+  var properties = PropertiesService.getScriptProperties();
+  properties.setProperty(reminderType, JSON.stringify({recipient: recipient, subject: subject, dateSent: dateSent, reminderDate: reminderDate}));
+}
+
+function sendReminderEmail() {
+  var properties = PropertiesService.getScriptProperties();
+  var reminderData = properties.getProperties();
+
+  for (var reminderType in reminderData) {
+    var data = JSON.parse(reminderData[reminderType]);
+    var yourEmail = Session.getActiveUser().getEmail();
+    var reminderSubject = "Reminder: Follow up on email sent to " + data.recipient;
+    var reminderBody = "This is a reminder to follow up on the email you sent to " + data.recipient + 
+                       " on " + data.dateSent + ". This reminder was set for " + new Date(data.reminderDate).toLocaleDateString() + 
+                       ".\n\nSubject: " + data.subject;
+    MailApp.sendEmail(yourEmail, reminderSubject, reminderBody);
+
+    // After sending the email, delete the property to avoid duplicate reminders
+    properties.deleteProperty(reminderType);
+  }
 }
 
 function setupTrigger() {
